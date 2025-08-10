@@ -70,66 +70,136 @@
 
 ## 4. 핵심 코드 구현
 
-예시----
-### `face_yolo.py`  
-**역할**: YOLO 기반 얼굴 탐지 및 월드 좌표계 변환  
-**주요 기능**: 얼굴 중심 픽셀 좌표 추출 → Hand-Eye Calibration 결과 행렬로 리맵핑 → `/remapped_coord` 토픽 발행  
+### 1. `2d_safe.py`
 
-**ROS 2 구성**:
-- **노드명**: `face_yolo_node` (얼굴 탐지 및 좌표 변환)
-- **토픽 발행**: `/remapped_coord` (3D 얼굴 위치 좌표)
+**역할**
 
-예시 종료-------
+* 사용자로부터 이미지를 입력받아 용접 경로 좌표를 추출 및 시각화
+* 추출된 좌표를 CSV 파일로 저장하고 기록 유지
+* 저장된 좌표를 불러와 로봇에 `movel` 명령으로 경로 이동 실행
+* 이동 중 툴 힘 센서를 모니터링하여 충격 발생 시 경고음 및 팝업 표시
+* 충격 감지 시 Z축 오프셋을 적용해 로봇을 상승시키고 작업 중단
 
-### `a_home.py`  
-**역할**:
-**주요 기능**:
+**ROS2 구성**
 
-**ROS 2 구성**:
-- **노드명**:
-- **토픽 발행**:
+* **노드명**: `rokey_simple_move` (namespace: `dsr01`)
+* **구독 토픽**: 없음 (툴 힘 센서 값, 현재 위치는 DSR API 함수 호출로 직접 획득)
+* **발행 토픽**: 없음
+* **서비스/액션**: 없음
+* **기타**:
 
+  * `rclpy.init()`, `rclpy.create_node()`로 노드 생성
+  * `DR_init.__dsr__node`로 DSR API 연동 후 `movel` 명령 실행
+  * ROS2 스핀 없이 단순 실행
+  * 종료 시 `rclpy.shutdown()` 호출
 
+---
 
-### `movec.py`  
-**역할**:
-**주요 기능**:
+### 2. `2d_ui.py`
 
-**ROS 2 구성**:
-- **노드명**:
-- **토픽 발행**:
+**역할**
 
+* `/dsr01/msg/current_posx` 토픽을 구독하여 현재 로봇 TCP 좌표 수신
+* GUI 버튼 클릭 시 현재 좌표를 `posx_2`, `posx_3`로 저장
+* 저장된 두 좌표를 `/saved_posx_pair` 토픽으로 발행
+* `/dsr01/system/set_robot_mode` 서비스로 로봇 모드 변경 요청
+* Tkinter GUI와 ROS2 노드를 병렬로 실행하여 제어
 
+**ROS2 구성**
 
-### `ui_node.py`  
-**역할**:
-**주요 기능**:
+* **노드명**:
 
-**ROS 2 구성**:
-- **노드명**:
-- **토픽 발행**:
+  * 구독/발행: `PosTopicSubscriber`
+  * 서비스 클라이언트: `service_client_node`
+* **구독 토픽**:
 
+  * `/dsr01/msg/current_posx` (`Float64MultiArray`)
+* **발행 토픽**:
 
+  * `/saved_posx_pair` (`Float64MultiArray`)
+* **서비스 클라이언트**:
 
-### `control_node.py`  
-**역할**:
-**주요 기능**:
+  * `/dsr01/system/set_robot_mode` (`dsr_msgs2/srv/SetRobotMode`)
+* **기타**:
 
-**ROS 2 구성**:
-- **노드명**:
-- **토픽 발행**:
+  * `rclpy.init()` 및 `rclpy.shutdown()` 사용
+  * `rclpy.spin()`은 구독 노드에서만 별도 스레드로 실행
 
+---
 
+### 3. `2d_control.py`
 
-### `ui_node2.py`
-**역할**:
-**주요 기능**:
+**역할**
 
-**ROS 2 구성**:
-- **노드명**:
-- **토픽 발행**:
+* `/saved_posx_pair` 토픽에서 두 개의 posx 좌표 배열 수신
+* 수신된 좌표를 순차적으로 `movej`, `movel` 명령으로 이동
+* 이동 완료 후 초기 위치로 복귀
+* 한 번의 데이터 수신 후 처리하고 대기
 
+**ROS2 구성**
 
+* **노드명**: `posx_mover` (namespace: `dsr01`)
+* **구독 토픽**: `/saved_posx_pair` (`Float64MultiArray`)
+* **발행 토픽**: 없음
+* **서비스/액션**: 없음
+* **기타**:
+
+  * `rclpy.init()` 및 `rclpy.create_node()`로 노드 생성
+  * `DR_init.__dsr__node`를 통해 DSR API 연동 후 명령 실행
+  * `rclpy.spin_once()`로 데이터 수신 처리
+  * 종료 시 `rclpy.shutdown()` 호출
+
+---
+
+### 4. `a_home.py`
+
+**역할**
+
+* 로봇을 홈 위치로 `movej` 명령으로 이동
+* TCP 좌표 3개를 캡처하여 저장
+* 3개의 좌표로 원의 중심과 반지름 계산
+* GUI에서 실시간 좌표 모니터링, 캡처, 계산, 저장 기능 제공
+* 로봇 모드 변경 서비스 호출 기능 포함
+
+**ROS2 구성**
+
+* **노드명**: `welding_move` (namespace: `dsr01`)
+* **구독 토픽**:
+
+  * `/dsr01/msg/current_posx` (`Float64MultiArray`)
+  * `/dsr01/msg/joint_state` (`Float64MultiArray`)
+* **발행 토픽**: 없음
+* **서비스 클라이언트**:
+
+  * `/dsr01/system/set_robot_mode` (`dsr_msgs2/srv/SetRobotMode`)
+* **기타**:
+
+  * GUI와 ROS2를 함께 실행
+  * 로컬 계산과 로봇 제어를 병행
+
+---
+
+### 5. `movec.py`
+
+**역할**
+
+* CSV 파일에서 3개의 포인트(P1, P2, P3) 좌표 읽기
+* P3으로 직선 이동(`movel`)
+* P2 경유 후 P1로 원호 이동(`movec`)
+* 툴과 TCP 설정 후 이동 명령 실행
+* 예외 처리와 ROS2 노드 생성·종료 관리 포함
+
+**ROS2 구성**
+
+* **노드명**: `movec` (namespace: `dsr01`)
+* **구독 토픽**: 없음 (좌표는 CSV에서 직접 읽음)
+* **발행 토픽**: 없음
+* **서비스/액션**: 없음
+* **기타**:
+
+  * `rclpy.init()` 및 `rclpy.create_node()`로 노드 생성
+  * `DR_init.__dsr__node`로 DSR API 연동
+  * 종료 시 `rclpy.shutdown()` 호출
 
 ---
 
