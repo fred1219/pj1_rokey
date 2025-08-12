@@ -68,19 +68,21 @@
 ---
 
 ## 2. 사용 장비 & 기술 스택
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/b73eb584-f6cc-4057-812d-52271783d33b" />
 
 ## 3. 주요 기능 구현 과정
 
-### 🟦 3-1. 규칙적 2D 용접접
+### 🟦 3-1. 규칙적 2D 용접
 
 > 좌표 캡처 UI와 제어 노드를 분리 구성한 형태<br>
+> <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/304a309f-e44a-42e1-b36a-5af3ed19ce69" /> <br>
 > **사용 코드:** `ui_node.py`, `control_node.py`
 
 #### 🔹 `ui_node.py`
 
 * **역할:**
   직접교시 모드 활성화로 사용자가 GUI를 통해 시작점, 도착점 좌표 기록 및 제어노드로 퍼블리시
-  
+
 ---
 
 #### 🔹 `control_node.py`
@@ -93,6 +95,7 @@
 ### 🟥 3-2. 불규칙적 2D 용접
 
 > 경로 이미지를 업로드하여, 지정한 간격으로 용접로봇이 이동할 포인트 추출 및 작동범위 고려 스케일링을 하여 스케일링된 좌표들을 csv파일에 저장하고 해당 좌표를 순차적으로 읽어 경로 이동<br>
+> <img width="400" height="600" alt="image" src="https://github.com/user-attachments/assets/5f763a28-536c-447d-aa40-e9c9739fc33d" /> <br>
 > **사용 코드:** `2d_safe.py`
 
 #### 🔹 `2d_safe.py`
@@ -102,13 +105,18 @@
   2. 용접로봇의 작동범위를 고려하여 좌표 스케일링
   3. 스케일링된 좌표들을 csv 파일로 저장
   4. csv 파일을 순차적으로 읽어 경로 이동<br>
+
+<br>
 ※ 따로 구현한 안전기능 코드를 통합하여 충돌감지 시 경고음, 팝업, 로봇 정지 동작 실행되도록 안전기능 구현
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/54834a2d-ca46-43ff-b36c-39e15d1a4565" /> <br>
+
 
 ---
 
 ### 🟩 3-3. 규칙적 3D 용접 (원호 용접)
 
 > 포인트 3점 캡처 → 올바른 경로인지 계산 후 CSV 저장 → 파일 불러와 원호 경로 수행<br>
+> <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/6669ee51-c24c-4852-8a33-ed4802c37695" /> <br>
 > **사용 코드:** `a_home.py`, `movec.py`
 
 #### 🔹 `a_home.py`
