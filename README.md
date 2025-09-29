@@ -13,8 +13,7 @@
 
 [![시연 영상 보기](https://img.youtube.com/vi/wykA4MYREYk/0.jpg)](https://youtu.be/wykA4MYREYk)
 
-📄 [PDF 소개 자료](링크)  
-💻 [GitHub 소스코드](링크)
+📄 [PDF 소개 자료](Autowelding.pdf)  
 
 ## 📑 프로젝트 개요
 
