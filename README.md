@@ -6,9 +6,9 @@
 - 📅 **개발 기간**: 2025.05.14 ~ 05.21 (8일)
 - 🧑‍🤝‍🧑 **인원 구성**: 4명  
   **(본인 역할: 3D 용접 자동화 시스템 설계, ROS 노드 연동 및 통합 테스트)**
-- 🛠 **사용 기술**: ROS 2, Doosan dsr 패키지
+- 🛠 **사용 기술**: ROS 2, Doosan dsr SDK 패키지
 - ✅ **주요 기능**: 2D/3D 용접 자동화, 예외 처리 및 안전 정지
-- 
+  
 ### 🎥 시연 영상
 
 [![시연 영상 보기](https://img.youtube.com/vi/wykA4MYREYk/0.jpg)](https://youtu.be/wykA4MYREYk)
